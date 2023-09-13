@@ -7,16 +7,21 @@ class DictionaryService {
   Future<void> initialize() async {}
 
   Future<List<Definition>?> getDefinition(String word) async {
-    final response = await http.get(
-        Uri.parse('https://api.dictionaryapi.dev/api/v2/entries/en/$word'));
+    var client = http.Client();
+    var uri = Uri.parse("https://api.dictionaryapi.dev/api/v2/entries/en/jug");
+
+    var response = await client.get(uri);
 
     if (response.statusCode == 200) {
-      // definitionFromjson(response.body);
-      Definition.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to load album');
-    }
+      // Parse the JSON response into a list of Definition objects
+      List<Definition> definitions = (jsonDecode(response.body) as List)
+          .map((data) => Definition.fromJson(data))
+          .toList();
 
-    return null;
+      // Return the parsed definitions
+      return definitions;
+    } else {
+      throw Exception('Failed to load definitions');
+    }
   }
 }

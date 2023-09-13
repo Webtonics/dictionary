@@ -105,8 +105,8 @@ class Meaning {
 
 class Definition {
   String definition;
-  List<dynamic> synonyms;
-  List<dynamic> antonyms;
+  List<String> synonyms; // Specify the type as List<String>
+  List<String> antonyms; // Specify the type as List<String>
   String? example;
 
   Definition({
@@ -116,12 +116,21 @@ class Definition {
     this.example,
   });
 
-  factory Definition.fromJson(Map<String, dynamic> json) => Definition(
-        definition: json["definition"],
-        synonyms: List<dynamic>.from(json["synonyms"].map((x) => x)),
-        antonyms: List<dynamic>.from(json["antonyms"].map((x) => x)),
-        example: json["example"],
-      );
+  factory Definition.fromJson(Map<String, dynamic> json) {
+    return Definition(
+      definition: json["definition"] ?? "",
+      synonyms: List<String>.from(json["synonyms"] ?? []),
+      antonyms: List<String>.from(json["antonyms"] ?? []),
+      example: json["example"],
+    );
+  }
+
+  // factory Definition.fromJson(Map<String, dynamic> json) => Definition(
+  //       definition: json["definition"],
+  //       synonyms: List<dynamic>.from(json["synonyms"].map((x) => x)),
+  //       antonyms: List<dynamic>.from(json["antonyms"].map((x) => x)),
+  //       example: json["example"],
+  //     );
 
   Map<String, dynamic> toJson() => {
         "definition": definition,

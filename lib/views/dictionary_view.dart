@@ -13,13 +13,25 @@ class DictionaryBody extends StatefulWidget {
 }
 
 class _DictionaryBodyState extends State<DictionaryBody> {
-  late Future<List<Definition>?> result;
+  List<Definition>? result;
   // late Future<Definition?> result;
+  var isLoading = false;
   @override
   void initState() {
-    result = DictionaryService().getDefinition(widget.word);
+    getData();
     // DictionaryService().getDefinition(widget.word);
     super.initState();
+  }
+
+  Future<List<Definition>?> getData() async {
+    List<Definition>? result =
+        await DictionaryService().getDefinition(widget.word);
+    if (result != null) {
+      setState(() {
+        isLoading = true;
+      });
+    }
+    return result;
   }
 
   @override
@@ -29,9 +41,28 @@ class _DictionaryBodyState extends State<DictionaryBody> {
         title: Text(widget.word),
       ),
       body: FutureBuilder<List<Definition>?>(
-        future: result,
+        future: getData(), // Use await to call getData
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: Column(
+                children: [
+                  const Text("Loading..."),
+                  CircularProgressIndicator(
+                    color: Colors.red,
+                  ),
+                ],
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}");
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Container(
+              child: const Text("No data available"),
+            );
+          } else {
+            List<Definition>? result = snapshot.data;
+
             return Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
@@ -39,32 +70,23 @@ class _DictionaryBodyState extends State<DictionaryBody> {
                   const Text(
                     "Definitions",
                     style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold),
+                      color: Colors.black,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   spacer,
-                  Text(widget.word),
+                  Text(
+                    result!.length.toString(),
+                  ),
                   spacer,
                   const Text(
                     "Synonyms",
                     style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            );
-          } else if (snapshot.hasError) {
-            return Text("${snapshot.error}");
-          } else {
-            return Center(
-              child: Column(
-                children: [
-                  const Text("not Loading"),
-                  const CircularProgressIndicator(
-                    color: Colors.red,
+                      color: Colors.black,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
